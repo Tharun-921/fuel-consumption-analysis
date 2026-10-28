@@ -4,211 +4,827 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fuel Dashboard</title>
+    <title>Fuel Analytics | Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        * { box-sizing: border-box; }
-        body {
+        * {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f1f5f9;
-            color: #172033;
+            padding: 0;
+            box-sizing: border-box;
         }
-        header {
-            background: #0f172a;
-            color: white;
-            padding: 22px 5%;
+
+        :root {
+            --bg: #0b1020;
+            --panel: #131b2e;
+            --panel2: #19233a;
+            --text: #f3f6ff;
+            --muted: #91a0bb;
+            --purple: #9270ff;
+            --cyan: #45d9e8;
+            --border: #27324a;
         }
-        header a { color: #7dd3fc; text-decoration: none; }
-        main { max-width: 1200px; margin: auto; padding: 28px 18px; }
-        .cards {
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 245px;
+            background: #0e1527;
+            border-right: 1px solid var(--border);
+            padding: 30px 18px;
+            position: fixed;
+            inset: 0 auto 0 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 800;
+            margin: 0 8px 45px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
+            place-items: center;
+            border-radius: 13px;
+            background: linear-gradient(135deg, #9270ff, #48cde8);
+            color: #07101d;
+            font-size: 20px;
+        }
+
+        .nav-label {
+            color: #687895;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: 0 12px 15px;
+        }
+
+        .nav-link {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 7px;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #222340;
+            color: #b8a5ff;
+        }
+
+        .nav-link.active {
+            border: 1px solid #39365d;
+        }
+
+        .nav-link i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 16px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+        }
+
+        .sidebar-bottom p {
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.7;
+            margin-top: 8px;
+        }
+
+        main {
+            width: calc(100% - 245px);
+            margin-left: 245px;
+            padding: 34px;
+            max-width: 1700px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 34px;
+        }
+
+        .eyebrow {
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 10px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: clamp(25px, 3vw, 34px);
+            letter-spacing: -1.2px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .date-pill {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #c7d1e7;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .welcome {
+            padding: 28px;
+            border-radius: 22px;
+            background:
+                radial-gradient(ellipse at 90% 10%, #5847a655, transparent 45%),
+                linear-gradient(115deg, #202444, #14283a);
+            border: 1px solid #343654;
+            margin-bottom: 27px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome h2 {
+            font-size: 23px;
+            margin-bottom: 10px;
+        }
+
+        .welcome p {
+            color: #b0bdd4;
+            font-size: 13px;
+            line-height: 1.8;
+            max-width: 550px;
+        }
+
+        .welcome-icon {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 85px;
+            color: #b5a4ff;
+            opacity: .22;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 17px;
             margin-bottom: 28px;
         }
-        .card, .panel {
-            background: white;
-            padding: 22px;
-            border-radius: 12px;
-            box-shadow: 0 3px 12px #0f172a0d;
+
+        .stat-card, .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
         }
-        .card p { color: #64748b; margin-bottom: 8px; }
-        .card h2 { color: #0369a1; margin: 0; }
-        .panel { margin-bottom: 24px; overflow-x: auto; }
+
+        .stat-card {
+            padding: 21px;
+            min-width: 0;
+            transition: transform .2s, border-color .2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: #6757a0;
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 13px;
+            font-size: 17px;
+        }
+
+        .purple { background: #342958; color: #bba7ff; }
+        .blue { background: #16354b; color: #6bd5ff; }
+        .green { background: #153c36; color: #64e6b4; }
+        .orange { background: #453023; color: #ffbd7d; }
+
+        .stat-tag {
+            font-size: 10px;
+            color: #8ca0bc;
+        }
+
+        .stat-card h3 {
+            font-size: 25px;
+            letter-spacing: -.7px;
+            overflow-wrap: anywhere;
+        }
+
+        .stat-card p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 9px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel {
+            padding: 24px;
+            margin-bottom: 22px;
+            min-width: 0;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 23px;
+        }
+
+        .panel-header h2 {
+            font-size: 16px;
+        }
+
+        .panel-header p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 7px;
+        }
+
+        .panel-header i {
+            color: var(--purple);
+            font-size: 20px;
+        }
+
+        .field {
+            margin-bottom: 17px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            color: #bac5da;
+            margin-bottom: 9px;
+            font-weight: 600;
+        }
+
+        .field input, .field select {
+            width: 100%;
+            padding: 13px;
+            background: #0d1527;
+            border: 1px solid #2b3750;
+            color: white;
+            border-radius: 10px;
+            outline: none;
+            font: inherit;
+            font-size: 12px;
+            min-width: 0;
+        }
+
+        .field input:focus, .field select:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px #9270ff20;
+        }
+
+        .field input::placeholder {
+            color: #62718c;
+        }
+
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 16px;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 14px;
         }
-        label { display: block; font-weight: bold; margin-bottom: 7px; }
-        input, select {
+
+        .btn {
             width: 100%;
-            padding: 11px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 15px;
-        }
-        button {
+            padding: 14px;
             border: 0;
-            padding: 11px 16px;
-            border-radius: 6px;
-            background: #0284c7;
+            border-radius: 11px;
+            font: inherit;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .btn-primary {
+            color: #080e1b;
+            background: linear-gradient(100deg, #a38aff, #54d8e8);
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.12);
+            transform: translateY(-1px);
+        }
+
+        .messages {
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 13px 16px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .message.success {
+            color: #7ce7bd;
+            background: #15372f;
+            border: 1px solid #285c4e;
+        }
+
+        .message.error {
+            color: #ff9b9b;
+            background: #421f2a;
+            border: 1px solid #6a3341;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 690px;
+            font-size: 11px;
+        }
+
+        th {
+            color: #788aa7;
+            text-align: left;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #202b40;
+            color: #d8e1f1;
+        }
+
+        tbody tr:hover {
+            background: #19243a;
+        }
+
+        .vehicle {
+            font-weight: 700;
             color: white;
+        }
+
+        .subtext {
+            display: block;
+            color: #788aa7;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .fuel-badge {
+            display: inline-block;
+            padding: 6px 9px;
+            background: #292442;
+            color: #c4b6ff;
+            border-radius: 7px;
+            font-size: 10px;
+        }
+
+        .delete-btn {
+            background: #44212b;
+            color: #ff9ca8;
+            border: 1px solid #60303d;
+            border-radius: 8px;
+            padding: 8px 10px;
             cursor: pointer;
         }
-        .save { margin-top: 18px; }
-        table { width: 100%; border-collapse: collapse; min-width: 850px; }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
+
+        .delete-btn:hover {
+            background: #60303d;
         }
-        th { background: #f8fafc; }
-        .delete { background: #dc2626; }
-        .message { padding: 12px; margin-bottom: 12px; border-radius: 6px; }
-        .success { background: #dcfce7; color: #166534; }
-        .error { background: #fee2e2; color: #991b1b; }
-        .hint { color: #64748b; font-size: 14px; }
+
+        .empty {
+            text-align: center;
+            color: var(--muted);
+            padding: 32px 10px;
+            font-size: 12px;
+        }
+
+        .empty i {
+            display: block;
+            color: #6554a1;
+            font-size: 28px;
+            margin-bottom: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #596984;
+            font-size: 10px;
+            padding: 16px 0 0;
+        }
+
+        @media (max-width: 1200px) {
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                padding: 15px;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .brand {
+                margin: 0 10px 0 0;
+                font-size: 15px;
+            }
+
+            .brand-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .nav-label, .sidebar-bottom {
+                display: none;
+            }
+
+            .nav-link {
+                margin: 0;
+                padding: 10px;
+                font-size: 11px;
+            }
+
+            .layout {
+                display: block;
+            }
+
+            main {
+                width: 100%;
+                margin-left: 0;
+                padding: 22px 15px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+                margin-bottom: 22px;
+            }
+
+            .welcome {
+                padding: 22px;
+            }
+
+            .welcome-icon {
+                right: 18px;
+                font-size: 55px;
+            }
+
+            .welcome p {
+                max-width: 80%;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .stats {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 14px;
+            }
+
+            .stat-card h3 {
+                font-size: 20px;
+            }
+
+            .stat-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome h2 {
+                font-size: 19px;
+            }
+
+            .date-pill {
+                white-space: normal;
+            }
+        }
     </style>
 </head>
+
 <body>
-<header>
-    <h1>Fuel Consumption Analysis System</h1>
-    <a href="/">← Back to Home</a>
-</header>
+<div class="layout">
 
-<main>
-    <h2>Dashboard</h2>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% for category, message in messages %}
-            <div class="message {{ category }}">{{ message }}</div>
-        {% endfor %}
-    {% endwith %}
-
-    <section class="cards">
-        <div class="card">
-            <p>Total Fuel (litres)</p>
-            <h2>{{ total_litres }}</h2>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-gas-pump"></i></div>
+            <span>Fuel<span style="color:#a895ff">Analytics</span></span>
         </div>
-        <div class="card">
-            <p>Total Fuel Cost (₹)</p>
-            <h2>₹{{ "%.2f"|format(total_cost) }}</h2>
+
+        <div class="nav-label">WORKSPACE</div>
+
+        <a href="{{ url_for('home') }}" class="nav-link">
+            <i class="fa-solid fa-house"></i> Home
+        </a>
+
+        <a href="{{ url_for('dashboard') }}" class="nav-link active">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+        </a>
+
+        <a href="#add-record" class="nav-link">
+            <i class="fa-solid fa-plus-circle"></i> Add Fuel Record
+        </a>
+
+        <a href="#records" class="nav-link">
+            <i class="fa-solid fa-clock-rotate-left"></i> Fuel History
+        </a>
+
+        <div class="sidebar-bottom">
+            <i class="fa-solid fa-shield-halved" style="color:#9270ff"></i>
+            <strong style="font-size:12px; margin-left:7px;">Fuel Monitor</strong>
+            <p>Track fuel usage, expenses and vehicle mileage in one place.</p>
         </div>
-        <div class="card">
-            <p>Total Distance (km)</p>
-            <h2>{{ total_distance }}</h2>
-        </div>
-        <div class="card">
-            <p>Average Mileage (km/litre)</p>
-            <h2>{{ average_mileage }}</h2>
-        </div>
-    </section>
+    </aside>
 
-    <section class="panel">
-        <h2>Add Fuel Details</h2>
-        <p class="hint">Enter the fuel purchase details and distance travelled for this entry.</p>
+    <main>
+        <header class="topbar">
+            <div>
+                <div class="eyebrow">OVERVIEW / DASHBOARD</div>
+                <h1>Fuel Dashboard</h1>
+                <p class="subtitle">Monitor your vehicle performance and fuel expenses.</p>
+            </div>
 
-        <form action="{{ url_for('add_fuel') }}" method="POST">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="date-pill">
+                <i class="fa-regular fa-calendar" style="margin-right:8px;color:#a895ff"></i>
+                {{ today }}
+            </div>
+        </header>
 
-            <div class="form-grid">
-                <div>
-                    <label for="vehicle_number">Vehicle Number</label>
-                    <input id="vehicle_number" name="vehicle_number"
-                           placeholder="e.g. AP 03 AB 1234" required>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="messages">
+                    {% for category, message in messages %}
+                        <div class="message {{ category }}">{{ message }}</div>
+                    {% endfor %}
                 </div>
+            {% endif %}
+        {% endwith %}
 
-                <div>
-                    <label for="date">Date</label>
-                    <input id="date" type="date" name="date"
-                           value="{{ today }}" required>
+        <section class="welcome">
+            <h2>Welcome to Fuel Analytics 👋</h2>
+            <p>
+                Your vehicle insights, all in one place.
+                Add fuel entries and track your total spending,
+                consumption and average mileage.
+            </p>
+            <i class="fa-solid fa-gauge-high welcome-icon"></i>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon purple"><i class="fa-solid fa-gas-pump"></i></div>
+                    <span class="stat-tag">ALL RECORDS</span>
                 </div>
+                <h3>{{ "%.2f"|format(total_litres) }} L</h3>
+                <p>Total Fuel Consumed</p>
+            </div>
 
-                <div>
-                    <label for="fuel_type">Fuel Type</label>
-                    <select id="fuel_type" name="fuel_type" required>
-                        <option value="Petrol">Petrol</option>
-                        <option value="Diesel">Diesel</option>
-                        <option value="CNG">CNG</option>
-                        <option value="Electric">Electric</option>
-                    </select>
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                    <span class="stat-tag">ALL RECORDS</span>
                 </div>
+                <h3>₹{{ "%.2f"|format(total_cost) }}</h3>
+                <p>Total Fuel Expenses</p>
+            </div>
 
-                <div>
-                    <label for="litres">Fuel Quantity (litres)</label>
-                    <input id="litres" type="number" name="litres"
-                           min="0.01" step="0.01" required>
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon blue"><i class="fa-solid fa-route"></i></div>
+                    <span class="stat-tag">ALL RECORDS</span>
                 </div>
+                <h3>{{ "%.2f"|format(total_distance) }} km</h3>
+                <p>Total Distance Travelled</p>
+            </div>
 
-                <div>
-                    <label for="price_per_litre">Price per Litre (₹)</label>
-                    <input id="price_per_litre" type="number"
-                           name="price_per_litre" min="0" step="0.01" required>
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon orange"><i class="fa-solid fa-gauge"></i></div>
+                    <span class="stat-tag">AVERAGE</span>
                 </div>
+                <h3>{{ "%.2f"|format(average_mileage) }}</h3>
+                <p>Average Mileage (km/L)</p>
+            </div>
+        </section>
 
-                <div>
-                    <label for="odometer">Current Odometer (km)</label>
-                    <input id="odometer" type="number" name="odometer"
-                           min="0" step="0.1" required>
-                </div>
+        <section class="content-grid">
 
-                <div>
-                    <label for="distance">Distance Travelled (km)</label>
-                    <input id="distance" type="number" name="distance"
-                           min="0" step="0.1" required>
+            <div>
+                <div class="panel" id="add-record">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Add Fuel Record</h2>
+                            <p>Enter your vehicle's latest fuel details.</p>
+                        </div>
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+
+                    <form action="{{ url_for('add_fuel') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="vehicle_number">Vehicle Number</label>
+                                <input id="vehicle_number" name="vehicle_number"
+                                       placeholder="AP 01 AB 1234" required maxlength="30">
+                            </div>
+
+                            <div class="field">
+                                <label for="date">Fuel Date</label>
+                                <input id="date" type="date" name="date"
+                                       value="{{ today }}" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="fuel_type">Fuel Type</label>
+                                <select id="fuel_type" name="fuel_type" required>
+                                    <option value="Petrol">Petrol</option>
+                                    <option value="Diesel">Diesel</option>
+                                    <option value="CNG">CNG</option>
+                                    <option value="Electric">Electric</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label for="litres">Fuel Quantity (Litres)</label>
+                                <input id="litres" type="number" name="litres"
+                                       min="0.01" step="0.01" placeholder="10.00" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="price_per_litre">Price per Litre (₹)</label>
+                                <input id="price_per_litre" type="number"
+                                       name="price_per_litre" min="0" step="0.01"
+                                       placeholder="105.50" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="odometer">Odometer (km)</label>
+                                <input id="odometer" type="number" name="odometer"
+                                       min="0" step="0.1" placeholder="25000" required>
+                            </div>
+
+                            <div class="field" style="grid-column:1/-1">
+                                <label for="distance">Distance Travelled (km)</label>
+                                <input id="distance" type="number" name="distance"
+                                       min="0" step="0.1" placeholder="Enter distance since last fill" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-plus" style="margin-right:8px"></i>
+                            Save Fuel Record
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            <button class="save" type="submit">Save Fuel Details</button>
-        </form>
-    </section>
+            <div class="panel" id="records">
+                <div class="panel-header">
+                    <div>
+                        <h2>Fuel History</h2>
+                        <p>Your recently saved fuel records.</p>
+                    </div>
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
 
-    <section class="panel">
-        <h2>Saved Fuel Records</h2>
+                {% if records %}
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Vehicle / Date</th>
+                                    <th>Fuel</th>
+                                    <th>Litres</th>
+                                    <th>Cost</th>
+                                    <th>Mileage</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
 
-        {% if records %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Vehicle</th>
-                    <th>Fuel</th>
-                    <th>Litres</th>
-                    <th>Price/Litre</th>
-                    <th>Total Cost</th>
-                    <th>Distance (km)</th>
-                    <th>Mileage (km/L)</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for record in records %}
-                <tr>
-                    <td>{{ record.date.strftime("%d-%m-%Y") }}</td>
-                    <td>{{ record.vehicle_number }}</td>
-                    <td>{{ record.fuel_type }}</td>
-                    <td>{{ record.litres }}</td>
-                    <td>₹{{ "%.2f"|format(record.price_per_litre) }}</td>
-                    <td>₹{{ "%.2f"|format(record.total_cost) }}</td>
-                    <td>{{ record.distance }}</td>
-                    <td>{{ record.mileage }}</td>
-                    <td>
-                        <form action="{{ url_for('delete_fuel', record_id=record.id) }}"
-                              method="POST"
-                              onsubmit="return confirm('Delete this fuel record?');">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button class="delete" type="submit">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-            <p>No fuel records yet. Add your first entry above.</p>
-        {% endif %}
-    </section>
-</main>
+                            <tbody>
+                                {% for record in records %}
+                                    <tr>
+                                        <td>
+                                            <span class="vehicle">{{ record.vehicle_number }}</span>
+                                            <span class="subtext">{{ record.date }}</span>
+                                        </td>
+                                        <td><span class="fuel-badge">{{ record.fuel_type }}</span></td>
+                                        <td>{{ "%.2f"|format(record.litres) }}</td>
+                                        <td>₹{{ "%.2f"|format(record.total_cost) }}</td>
+                                        <td>{{ "%.2f"|format(record.mileage) }} km/L</td>
+                                        <td>
+                                            <form method="POST"
+                                                  action="{{ url_for('delete_fuel', record_id=record.id) }}"
+                                                  onsubmit="return confirm('Delete this fuel record?');">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="delete-btn" aria-label="Delete record">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <strong>No fuel records yet</strong>
+                        <p style="margin-top:9px;line-height:1.8">
+                            Add your first record using the form.
+                            Your fuel history will appear here.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </section>
+
+        <footer class="footer">
+            Fuel Consumption Analysis System · Built for smarter fuel tracking
+        </footer>
+    </main>
+</div>
 </body>
 </html>
