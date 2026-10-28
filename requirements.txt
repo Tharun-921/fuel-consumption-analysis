@@ -1,3 +1,13 @@
-git add requirements.txt
-git commit -m "Add gunicorn for Render deployment"
-git push
+
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-WTF
+Flask-Migrate
+psycopg[binary]
+python-dotenv
+pandas
+openpyxl
+reportlab
+gunicorn
+email-validator
