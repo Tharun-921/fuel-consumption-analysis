@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Consumption Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #0f172a;
+            color: white;
+            padding: 22px 5%;
+        }
+
+        header h1 {
+            margin: 0 0 12px;
+            font-size: 25px;
+        }
+
+        header a {
+            color: #7dd3fc;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: auto;
+            padding: 25px 18px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .card, .panel {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0000000b;
+        }
+
+        .card p {
+            color: #64748b;
+            margin-top: 0;
+        }
+
+        .card h2 {
+            color: #0284c7;
+            margin-bottom: 0;
+        }
+
+        .panel {
+            margin-bottom: 25px;
+            overflow-x: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 17px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            background: #0284c7;
+            cursor: pointer;
+        }
+
+        .save {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        th {
+            background: #f8fafc;
+        }
+
+        .delete {
+            background: #dc2626;
+        }
+
+        .message {
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 6px;
+        }
+
+        .success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .hint {
+            color: #64748b;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Fuel Consumption Analysis System</h1>
+    <a href="/">← Back to Home</a>
+</header>
+
+<main>
+    <h2>Dashboard</h2>
+    <p>Manage your vehicle fuel records and analyze consumption.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <section class="cards">
+        <div class="card">
+            <p>Total Fuel Consumed</p>
+            <h2>{{ total_litres }} L</h2>
+        </div>
+
+        <div class="card">
+            <p>Total Fuel Cost</p>
+            <h2>₹{{ "%.2f"|format(total_cost) }}</h2>
+        </div>
+
+        <div class="card">
+            <p>Total Distance</p>
+            <h2>{{ total_distance }} km</h2>
+        </div>
+
+        <div class="card">
+            <p>Average Mileage</p>
+            <h2>{{ average_mileage }} km/L</h2>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Add Fuel Details</h2>
+        <p class="hint">Enter the details below and save your record.</p>
+
+        <form action="{{ url_for('add_fuel') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-grid">
+                <div>
+                    <label for="vehicle_number">Vehicle Number</label>
+                    <input id="vehicle_number" name="vehicle_number"
+                           placeholder="AP 03 AB 1234" required>
+                </div>
+
+                <div>
+                    <label for="date">Date</label>
+                    <input id="date" type="date" name="date"
+                           value="{{ today }}" required>
+                </div>
+
+                <div>
+                    <label for="fuel_type">Fuel Type</label>
+                    <select id="fuel_type" name="fuel_type" required>
+                        <option value="Petrol">Petrol</option>
+                        <option value="Diesel">Diesel</option>
+                        <option value="CNG">CNG</option>
+                        <option value="Electric">Electric</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="litres">Fuel Quantity (litres)</label>
+                    <input id="litres" type="number" name="litres"
+                           min="0.01" step="0.01" required>
+                </div>
+
+                <div>
+                    <label for="price_per_litre">Price per Litre (₹)</label>
+                    <input id="price_per_litre" type="number"
+                           name="price_per_litre" min="0" step="0.01" required>
+                </div>
+
+                <div>
+                    <label for="odometer">Odometer Reading (km)</label>
+                    <input id="odometer" type="number" name="odometer"
+                           min="0" step="0.1" required>
+                </div>
+
+                <div>
+                    <label for="distance">Distance Travelled (km)</label>
+                    <input id="distance" type="number" name="distance"
+                           min="0" step="0.1" required>
+                </div>
+            </div>
+
+            <button type="submit" class="save">Save Fuel Details</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Saved Fuel Records</h2>
+
+        {% if records %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Vehicle</th>
+                    <th>Fuel</th>
+                    <th>Litres</th>
+                    <th>Price/Litre</th>
+                    <th>Total Cost</th>
+                    <th>Distance</th>
+                    <th>Mileage</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.date.strftime("%d-%m-%Y") }}</td>
+                    <td>{{ record.vehicle_number }}</td>
+                    <td>{{ record.fuel_type }}</td>
+                    <td>{{ record.litres }}</td>
+                    <td>₹{{ "%.2f"|format(record.price_per_litre) }}</td>
+                    <td>₹{{ "%.2f"|format(record.total_cost) }}</td>
+                    <td>{{ record.distance }} km</td>
+                    <td>{{ record.mileage }} km/L</td>
+                    <td>
+                        <form action="{{ url_for('delete_fuel', record_id=record.id) }}"
+                              method="POST"
+                              onsubmit="return confirm('Delete this record?');">
+                            <input type="hidden" name="csrf_token"
+                                   value="{{ csrf_token() }}">
+                            <button type="submit" class="delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p>No fuel records available. Add your first record above.</p>
+        {% endif %}
+    </section>
+</main>
+
+</body>
+</html>

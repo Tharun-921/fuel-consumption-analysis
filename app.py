@@ -152,13 +152,95 @@ def health():
     })
 
 
+<<<<<<< HEAD
 @app.route("/login")
 def login():
     return "Login functionality will be added next.", 200
+=======
+@app.route("/dashboard")
+def dashboard():
+    records = FuelRecord.query.order_by(
+        FuelRecord.date.desc()
+    ).all()
+
+    total_litres = sum(r.litres for r in records)
+    total_cost = sum(r.total_cost for r in records)
+    total_distance = sum(r.distance for r in records)
+
+    average_mileage = (
+        round(total_distance / total_litres, 2)
+        if total_litres > 0 else 0
+    )
+
+    return render_template(
+        "dashboard.html",
+        records=records,
+        total_litres=round(total_litres, 2),
+        total_cost=round(total_cost, 2),
+        total_distance=round(total_distance, 2),
+        average_mileage=average_mileage,
+        today=__import__("datetime").date.today().isoformat()
+    )
+
+
+@app.route("/fuel/add", methods=["POST"])
+def add_fuel():
+    try:
+        record = FuelRecord(
+            vehicle_number=request.form["vehicle_number"].strip().upper(),
+            date=__import__("datetime").date.fromisoformat(
+                request.form["date"]
+            ),
+            fuel_type=request.form["fuel_type"],
+            litres=float(request.form["litres"]),
+            price_per_litre=float(request.form["price_per_litre"]),
+            odometer=float(request.form["odometer"]),
+            distance=float(request.form["distance"])
+        )
+
+        if (
+            not record.vehicle_number
+            or record.litres <= 0
+            or record.price_per_litre < 0
+            or record.odometer < 0
+            or record.distance < 0
+        ):
+            raise ValueError("Invalid values")
+
+        db.session.add(record)
+        db.session.commit()
+        flash("Fuel details saved successfully!", "success")
+
+    except (ValueError, KeyError):
+        db.session.rollback()
+        flash("Please enter valid details.", "error")
+    except Exception:
+        db.session.rollback()
+        app.logger.exception("Saving fuel record failed")
+        flash("Database error. Check Render logs.", "error")
+
+    return redirect(url_for("dashboard"))
+
+
+@app.route("/fuel/delete/<int:record_id>", methods=["POST"])
+def delete_fuel(record_id):
+    record = db.session.get(FuelRecord, record_id)
+
+    if record:
+        db.session.delete(record)
+        db.session.commit()
+        flash("Fuel record deleted.", "success")
+    else:
+        flash("Record not found.", "error")
+
+    return redirect(url_for("dashboard"))
+
+
+# Create missing tables whenever the application starts.
+with app.app_context():
+    db.create_all()
+>>>>>>> 76ad23e (Add fuel dashboard page)
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-
     app.run(debug=os.getenv("FLASK_DEBUG", "0") == "1")
